@@ -1,0 +1,39 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+/*
+ * Palette lifted directly from the imported Claude Design file
+ * (OpenTable Discovery.dc.html) - see the plan's "Design spec" section.
+ * Kept as oklch() to match the source exactly rather than converting to hex.
+ */
+@theme {
+  --color-brand: oklch(0.55 0.17 35);
+  --color-brand-hover: oklch(0.45 0.17 35);
+  --color-page: oklch(0.965 0.01 70);
+  --color-ink: oklch(0.22 0.02 50);
+  --color-muted: oklch(0.45 0.02 50);
+  --color-muted-light: oklch(0.55 0.02 50);
+  --color-border: oklch(0.9 0.015 60);
+  --color-border-strong: oklch(0.85 0.02 40);
+  --color-chip: oklch(0.94 0.01 60);
+  --color-chip-fg: oklch(0.35 0.02 50);
+  --color-gold: oklch(0.62 0.19 75);
+  --color-map-bg: oklch(0.93 0.03 130);
+  --color-map-grid: oklch(0.9 0.03 130);
+
+  --font-sans: var(--font-inter), Helvetica, Arial, sans-serif;
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+}
+
+/* Leaflet's default marker icon assets are handled via a divIcon instead
+   (see components/MapInner.tsx), but this keeps the container sizing sane
+   inside a flex/grid layout. */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-sans);
+}
