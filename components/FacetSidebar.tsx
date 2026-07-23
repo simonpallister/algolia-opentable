@@ -1,20 +1,16 @@
-"use client";
+"use client"
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react"
 import {
   useCurrentRefinements,
   useRefinementList,
   useSearchBox,
   type UseRefinementListProps,
-} from "react-instantsearch";
-import { useDetectedArea } from "@/lib/geo";
+} from "react-instantsearch"
+import { useDetectedArea } from "@/lib/geo"
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="text-xs font-bold uppercase tracking-wide text-muted mb-2">
-      {children}
-    </div>
-  );
+  return <div className="text-xs font-bold uppercase tracking-wide text-muted mb-2">{children}</div>
 }
 
 /**
@@ -23,19 +19,17 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
  * DECISIONS.md) rather than deriving signage from `price_range`. Only
  * $$/$$$/$$$$ exist in the data (no tier 1) - see DECISIONS.md.
  */
-const PRICE_ORDER = ["$$", "$$$", "$$$$"];
+const PRICE_ORDER = ["$$", "$$$", "$$$$"]
 
 function PriceFacet() {
-  const { items, refine } = useRefinementList({ attribute: "price_display" });
-  const sorted = [...items].sort(
-    (a, b) => PRICE_ORDER.indexOf(a.value) - PRICE_ORDER.indexOf(b.value)
-  );
+  const { items, refine } = useRefinementList({ attribute: "price_display" })
+  const sorted = [...items].sort((a, b) => PRICE_ORDER.indexOf(a.value) - PRICE_ORDER.indexOf(b.value))
 
   return (
     <div>
       <SectionLabel>Price</SectionLabel>
       <div className="flex gap-1.5">
-        {sorted.map((item) => (
+        {sorted.map(item => (
           <button
             key={item.value}
             type="button"
@@ -43,17 +37,16 @@ function PriceFacet() {
             onClick={() => refine(item.value)}
             className={`text-sm font-bold px-3 py-1.5 rounded-lg transition-colors ${
               item.isRefined ? "bg-brand text-white" : "bg-chip text-chip-fg hover:bg-border"
-            }`}
-          >
+            }`}>
             {item.value}
           </button>
         ))}
       </div>
     </div>
-  );
+  )
 }
 
-type FacetItem = { value: string; label: string; count?: number; isRefined: boolean };
+type FacetItem = { value: string; label: string; count?: number; isRefined: boolean }
 
 /**
  * `useRefinementList`'s `items` is a plain slice of the top N values by
@@ -71,11 +64,11 @@ type FacetItem = { value: string; label: string; count?: number; isRefined: bool
  * doesn't already contain, so a checked box never silently disappears.
  */
 function withVisibleRefinements(items: FacetItem[], refinedValues: string[]): FacetItem[] {
-  const visibleValues = new Set(items.map((item) => item.value));
-  const missing = refinedValues.filter((value) => !visibleValues.has(value));
-  if (missing.length === 0) return items;
-  const synthesized: FacetItem[] = missing.map((value) => ({ value, label: value, isRefined: true }));
-  return [...synthesized, ...items];
+  const visibleValues = new Set(items.map(item => item.value))
+  const missing = refinedValues.filter(value => !visibleValues.has(value))
+  if (missing.length === 0) return items
+  const synthesized: FacetItem[] = missing.map(value => ({ value, label: value, isRefined: true }))
+  return [...synthesized, ...items]
 }
 
 function CheckboxList({
@@ -83,13 +76,13 @@ function CheckboxList({
   refine,
   labelFor,
 }: {
-  items: FacetItem[];
-  refine: (value: string) => void;
-  labelFor?: (value: string) => string;
+  items: FacetItem[]
+  refine: (value: string) => void
+  labelFor?: (value: string) => string
 }) {
   return (
     <div className="flex flex-col gap-2 text-sm text-chip-fg">
-      {items.map((item) => (
+      {items.map(item => (
         <label key={item.value} className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
@@ -104,7 +97,7 @@ function CheckboxList({
         </label>
       ))}
     </div>
-  );
+  )
 }
 
 function CheckboxFacet({
@@ -113,24 +106,24 @@ function CheckboxFacet({
   options,
   labelFor,
 }: {
-  label: string;
-  attribute: UseRefinementListProps["attribute"];
-  options?: Partial<UseRefinementListProps>;
-  labelFor?: (value: string) => string;
+  label: string
+  attribute: UseRefinementListProps["attribute"]
+  options?: Partial<UseRefinementListProps>
+  labelFor?: (value: string) => string
 }) {
-  const { items: currentRefinements } = useCurrentRefinements();
+  const { items: currentRefinements } = useCurrentRefinements()
   const refinedValues =
-    currentRefinements.find((r) => r.attribute === attribute)?.refinements.map((r) => String(r.value)) ?? [];
-  const { items, refine } = useRefinementList({ attribute, ...options });
-  const visibleItems = withVisibleRefinements(items, refinedValues);
-  if (visibleItems.length === 0) return null;
+    currentRefinements.find(r => r.attribute === attribute)?.refinements.map(r => String(r.value)) ?? []
+  const { items, refine } = useRefinementList({ attribute, ...options })
+  const visibleItems = withVisibleRefinements(items, refinedValues)
+  if (visibleItems.length === 0) return null
 
   return (
     <div>
       <SectionLabel>{label}</SectionLabel>
       <CheckboxList items={visibleItems} refine={refine} labelFor={labelFor} />
     </div>
-  );
+  )
 }
 
 /**
@@ -148,21 +141,23 @@ function GatedCheckboxFacet({
   gateAttribute,
   options,
 }: {
-  label: string;
-  attribute: UseRefinementListProps["attribute"];
-  gateAttribute: string;
-  options?: Partial<UseRefinementListProps>;
+  label: string
+  attribute: UseRefinementListProps["attribute"]
+  gateAttribute: string
+  options?: Partial<UseRefinementListProps>
 }) {
-  const { items: currentRefinements } = useCurrentRefinements();
-  const isGateOpen = currentRefinements.some((r) => r.attribute === gateAttribute);
+  const { items: currentRefinements } = useCurrentRefinements()
+  const isGateOpen = currentRefinements.some(r => r.attribute === gateAttribute)
   const refinedValues =
-    currentRefinements.find((r) => r.attribute === attribute)?.refinements.map((r) => String(r.value)) ?? [];
-  const { items, refine, isShowingMore, toggleShowMore, canToggleShowMore } =
-    useRefinementList({ attribute, ...options });
-  const visibleItems = withVisibleRefinements(items, refinedValues);
+    currentRefinements.find(r => r.attribute === attribute)?.refinements.map(r => String(r.value)) ?? []
+  const { items, refine, isShowingMore, toggleShowMore, canToggleShowMore } = useRefinementList({
+    attribute,
+    ...options,
+  })
+  const visibleItems = withVisibleRefinements(items, refinedValues)
 
-  if (!isGateOpen) return null;
-  if (visibleItems.length === 0) return null;
+  if (!isGateOpen) return null
+  if (visibleItems.length === 0) return null
 
   return (
     <div>
@@ -172,13 +167,12 @@ function GatedCheckboxFacet({
         <button
           type="button"
           onClick={() => toggleShowMore()}
-          className="text-brand text-xs font-bold mt-2 hover:text-brand-hover"
-        >
+          className="text-brand text-xs font-bold mt-2 hover:text-brand-hover">
           {isShowingMore ? "Show less" : "+ more"}
         </button>
       )}
     </div>
-  );
+  )
 }
 
 /**
@@ -219,14 +213,8 @@ function GatedCheckboxFacet({
  * re-suggested once. Not worth the complexity of hoisting this state
  * somewhere breakpoint-independent for that.
  */
-function AreaFacet({
-  detectedArea,
-  hasCoordinate,
-}: {
-  detectedArea?: string;
-  hasCoordinate: boolean;
-}) {
-  const { query } = useSearchBox();
+function AreaFacet({ detectedArea, hasCoordinate }: { detectedArea?: string; hasCoordinate: boolean }) {
+  const { query } = useSearchBox()
   // Count-descending (Algolia's default sort, same as every other facet
   // in this sidebar) rather than alphabetical - with 51 values and no
   // gate above it to naturally scope which ones matter, an alphabetical
@@ -235,47 +223,46 @@ function AreaFacet({
   // number of restaurants. `limit`/`showMore` matches the same "top N,
   // expand for the rest" pattern used for City/Neighborhood/Cuisine type
   // below, instead of dumping all 51 checkboxes on screen at once.
-  const { items, refine, isShowingMore, toggleShowMore, canToggleShowMore } =
-    useRefinementList({
-      attribute: "area",
-      limit: 10,
-      showMore: true,
-      showMoreLimit: 51,
-    });
+  const { items, refine, isShowingMore, toggleShowMore, canToggleShowMore } = useRefinementList({
+    attribute: "area",
+    limit: 10,
+    showMore: true,
+    showMoreLimit: 51,
+  })
   // Source of truth for what's actually refined, independent of whether
   // it's in the count-windowed `items` above - see `withVisibleRefinements`.
-  const { items: currentRefinements } = useCurrentRefinements();
+  const { items: currentRefinements } = useCurrentRefinements()
   const refinedAreaValues =
-    currentRefinements.find((r) => r.attribute === "area")?.refinements.map((r) => String(r.value)) ?? [];
-  const visibleItems = withVisibleRefinements(items, refinedAreaValues);
-  const hasAnyAreaRefined = refinedAreaValues.length > 0;
+    currentRefinements.find(r => r.attribute === "area")?.refinements.map(r => String(r.value)) ?? []
+  const visibleItems = withVisibleRefinements(items, refinedAreaValues)
+  const hasAnyAreaRefined = refinedAreaValues.length > 0
 
-  const autoAppliedRef = useRef(false);
-  const autoAppliedAreaRef = useRef<string | undefined>(undefined);
+  const autoAppliedRef = useRef(false)
+  const autoAppliedAreaRef = useRef<string | undefined>(undefined)
 
   useEffect(() => {
-    if (autoAppliedRef.current || !hasCoordinate) return;
-    const fallbackArea = items[0]?.value;
+    if (autoAppliedRef.current || !hasCoordinate) return
+    const fallbackArea = items[0]?.value
     // A real coordinate resolved but matched no area (out of range) and
     // the fallback candidate (most-popular area) needs the facet's own
     // counts to have loaded first - wait rather than lock in a "nothing to
     // apply" decision before that data exists.
-    if (!detectedArea && !fallbackArea && items.length === 0) return;
-    autoAppliedRef.current = true;
-    const areaToApply = detectedArea ?? fallbackArea;
+    if (!detectedArea && !fallbackArea && items.length === 0) return
+    autoAppliedRef.current = true
+    const areaToApply = detectedArea ?? fallbackArea
     if (areaToApply && !hasAnyAreaRefined && !query.trim()) {
-      refine(areaToApply);
-      autoAppliedAreaRef.current = areaToApply;
+      refine(areaToApply)
+      autoAppliedAreaRef.current = areaToApply
     }
-  }, [hasCoordinate, detectedArea, items, hasAnyAreaRefined, query, refine]);
+  }, [hasCoordinate, detectedArea, items, hasAnyAreaRefined, query, refine])
 
   useEffect(() => {
-    if (!query.trim()) return;
+    if (!query.trim()) return
     if (autoAppliedAreaRef.current) {
-      refine(autoAppliedAreaRef.current);
-      autoAppliedAreaRef.current = undefined;
+      refine(autoAppliedAreaRef.current)
+      autoAppliedAreaRef.current = undefined
     }
-  }, [query, refine]);
+  }, [query, refine])
 
   // Once an area is refined, `LocationBreadcrumb` is already showing and
   // controlling it as a removable pill - showing the full 51-checkbox list
@@ -288,30 +275,29 @@ function AreaFacet({
   // *different* area, remove the current one via its breadcrumb pill first
   // - same as how removing City is required before a fresh Neighborhood
   // pick becomes visible again in the gated facets below.
-  if (hasAnyAreaRefined) return null;
-  if (visibleItems.length === 0) return null;
+  if (hasAnyAreaRefined) return null
+  if (visibleItems.length === 0) return null
 
   return (
     <div>
       <SectionLabel>Area</SectionLabel>
       <CheckboxList
         items={visibleItems}
-        refine={(value) => {
-          autoAppliedAreaRef.current = undefined;
-          refine(value);
+        refine={value => {
+          autoAppliedAreaRef.current = undefined
+          refine(value)
         }}
       />
       {canToggleShowMore && (
         <button
           type="button"
           onClick={() => toggleShowMore()}
-          className="text-brand text-xs font-bold mt-2 hover:text-brand-hover"
-        >
+          className="text-brand text-xs font-bold mt-2 hover:text-brand-hover">
           {isShowingMore ? "Show less" : "+ more"}
         </button>
       )}
     </div>
-  );
+  )
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
@@ -319,10 +305,10 @@ const PAYMENT_LABELS: Record<string, string> = {
   Visa: "Visa",
   Discover: "Discover",
   MasterCard: "Mastercard",
-};
+}
 
 export default function FacetSidebar({ aroundLatLng }: { aroundLatLng?: string }) {
-  const { area: detectedArea, hasCoordinate } = useDetectedArea(aroundLatLng);
+  const { area: detectedArea, hasCoordinate } = useDetectedArea(aroundLatLng)
   return (
     <div className="flex flex-col gap-6">
       <AreaFacet detectedArea={detectedArea} hasCoordinate={hasCoordinate} />
@@ -338,11 +324,7 @@ export default function FacetSidebar({ aroundLatLng }: { aroundLatLng?: string }
         gateAttribute="city"
         options={{ limit: 8, showMore: true, showMoreLimit: 60 }}
       />
-      <CheckboxFacet
-        label="Cuisine"
-        attribute="cuisine_category"
-        options={{ limit: 13, sortBy: ["name:asc"] }}
-      />
+      <CheckboxFacet label="Cuisine" attribute="cuisine_category" options={{ limit: 13, sortBy: ["name:asc"] }} />
       <GatedCheckboxFacet
         label="Cuisine type"
         attribute="food_type"
@@ -350,12 +332,8 @@ export default function FacetSidebar({ aroundLatLng }: { aroundLatLng?: string }
         options={{ limit: 6, showMore: true, showMoreLimit: 120 }}
       />
       <PriceFacet />
+      <CheckboxFacet label="Payment" attribute="payment_options" labelFor={value => PAYMENT_LABELS[value] ?? value} />
       <CheckboxFacet label="Dining style" attribute="dining_style" options={{ limit: 6, showMore: true }} />
-      <CheckboxFacet
-        label="Payment"
-        attribute="payment_options"
-        labelFor={(value) => PAYMENT_LABELS[value] ?? value}
-      />
     </div>
-  );
+  )
 }

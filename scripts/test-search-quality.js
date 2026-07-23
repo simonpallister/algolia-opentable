@@ -121,6 +121,34 @@ async function main() {
     const italianCount = hits.filter((h) => h.food_type === "Italian").length;
     return italianCount > 0;
   });
+  await check(
+    '"asian" (category-level query) reaches the full cuisine_category group (219), not just food_type==="Asian" (61)',
+    async () => {
+      // Aggregate check, not a specific objectID: with cuisine_category
+      // searchable, nbHits should approach the full 219-record category,
+      // not stay pinned near the 61 that literally have food_type "Asian".
+      // A specific record like "Top of Waikiki" (objectID 86731, the
+      // example that proved the gap) isn't a reliable pin here, it's a
+      // modest performer among 219 now-competing candidates and can rank
+      // outside any fixed hitsPerPage window, this checks the aggregate
+      // effect instead.
+      const { nbHits } = await index.search("asian", { hitsPerPage: 1 });
+      return nbHits >= 150;
+    }
+  );
+  await check(
+    '"bbq" reaches the Southern/Creole/BBQ category (126), not just the 5 restaurants with "bbq"/"barbecue" in their name',
+    async () => {
+      const { nbHits } = await index.search("bbq", { hitsPerPage: 1 });
+      return nbHits >= 100;
+    }
+  );
+  await check('"fine dining seafood" combines dining_style + cuisine correctly', async () => {
+    // Truluck's Seafood, Steak and Crab House - Houston (objectID 4113):
+    // dining_style "Fine Dining", food_type "Seafood".
+    const { hits } = await index.search("fine dining seafood", { hitsPerPage: 30 });
+    return containsObjectID(hits, "4113");
+  });
 
   // --- 6. Location-embedded query (no separate "location mode" needed) ---
   console.log("\n6. Location embedded in free text");

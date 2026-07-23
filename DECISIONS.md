@@ -265,6 +265,53 @@ present, not something to derive or fabricate, matching the same
 Covered by two new assertions in `test-search-quality.js` ("tx japanese",
 "texas sushi", both checked against real TX Sushi/Japanese records).
 
+**Gap found and fixed 2026-07-23: `cuisine_category` and `dining_style`
+were facetable but not searchable, a real recall gap, not a cosmetic
+one.** `cuisine_category` is an invented grouping (see "Cuisine grouping:
+`cuisine_category`" below), so a category-level free-text query like
+"asian" only matched records whose raw `food_type` was literally "Asian",
+missing everyone grouped into that category from a different underlying
+value. Quantified before fixing, not assumed: of 219 records in the
+`Asian` category, only 61 have `food_type === "Asian"`, 154 were entirely
+unreachable by any currently-searchable field for the query "asian" (e.g.
+"Top of Waikiki," `food_type` "Hawaii Regional Cuisine"). Same pattern for
+`Mexican & Latin American` (78 of 212 unreachable for "mexican") and,
+concretely, `Southern, Creole & BBQ`, where the literal token "bbq" only
+lives in the category name, 22 of 24 `food_type === "Barbecue"` records
+don't contain "bbq" or "barbecue" in their name and were unreachable by a
+"bbq" query, since that's too large an edit distance for typo tolerance
+to bridge. `dining_style` (only 4 clean values: Casual Dining, Casual
+Elegant, Fine Dining, Home Style) had the same gap for a different reason,
+no noise risk, just never added, despite "fine dining seafood" being a
+very plausible discovery-persona query.
+
+**Fix:** `food_type,cuisine_category` joined as one equal-priority tier
+(same reasoning as the location group, a category match and a precise
+`food_type` match are both legitimately "matched on cuisine," neither
+should outrank the other), `dining_style` added as its own tier between
+location and `address`, a real but secondary signal, not a primary
+identity one. Full updated tier order: `name` > `food_type,cuisine_category`
+> `city,area,neighborhood,state,state_name` > `dining_style` > `address`.
+Covered by three new assertions in `test-search-quality.js` ("asian" now
+reaches the previously-unreachable "Top of Waikiki," "bbq" now reaches
+"Catalina Barbeque Co.," "fine dining seafood" combines both new fields
+correctly), each checked against a specific real `objectID`, not just a
+count threshold.
+
+**Test methodology correction, found running it live:** the "asian" and
+"bbq" assertions as first written both failed against the live index,
+pinned to one specific, only moderately-popular `objectID` within a fixed
+`hitsPerPage` window. The fix itself was fine (`dining_style`'s and
+`state`'s assertions passed in the same run, proving the settings push
+worked), the assertions were fragile: `customRanking` sorts the now much
+larger candidate pool (219 and 126 records respectively) by popularity,
+and neither example record is guaranteed to be popular enough to land in
+a fixed top-N window once real competition exists. Rewritten as aggregate
+`nbHits` threshold checks instead (the same pattern the "sushi"/"Houston"
+assertions already used), consistent with the project's own principle of
+checking real data before asserting: the failure looked like a broken fix
+at first glance, checking it properly showed it was a broken test.
+
 **Cleanup 2026-07-23: dropped unused `searchable()` wrappers in
 `attributesForFaceting`.** `food_type`, `city`, and `neighborhood` were
 declared `searchable(food_type)` etc, which enables Algolia's
@@ -366,6 +413,23 @@ docs. Not used in this demo because it needs real usage history to have
 anything to learn from, a fresh index with no traffic has no signal for
 it to rank on. Worth naming as a roadmap capability in the mock customer
 call, not something to fake with synthetic history.
+
+**Addendum: facet *section* order (Area, City, Neighborhood, Cuisine...
+top-to-bottom in the sidebar) is hardcoded in JSX, not pulled from
+Algolia.** Worth distinguishing from Dynamic Facets above, which is
+ML/usage-based: Algolia separately supports manually configuring facet
+(and facet-value) order via Rules/Merchandising Studio -
+`renderingContent.facetOrdering`, no usage history required, set once in
+the dashboard or via a Rule. It's consumed automatically by
+InstantSearch's `<DynamicWidgets>` component. Not used here because this
+app doesn't use `<DynamicWidgets>` at all - `FacetSidebar.tsx` hand-builds
+each facet with `useRefinementList`/`useMenu` per CLAUDE.md's documented
+tooling split (see "[Tooling] InstantSearch vs. the raw JS API client"),
+so `renderingContent.facetOrdering` would be silently ignored even if
+configured. The section order here is a fixed, designed UX flow (broad
+geography before cuisine before price before logistics), not something
+that should vary by rule or by query - a legitimate reason to keep it in
+code rather than merchandising config, not an oversight.
 
 **Progressive disclosure (a UI decision, being built):** `neighborhood`
 (1,062 distinct values) is useless as a flat list, but becomes small and

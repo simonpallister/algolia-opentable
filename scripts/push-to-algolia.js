@@ -76,7 +76,13 @@ function withPopularityScore(records) {
 // See DECISIONS.md for the reasoning behind every choice below.
 
 const INDEX_SETTINGS = {
-  searchableAttributes: ["name", "food_type", "city,area,neighborhood,state,state_name", "address"],
+  searchableAttributes: [
+    "name",
+    "food_type,cuisine_category",
+    "city,area,neighborhood,state,state_name",
+    "dining_style",
+    "address",
+  ],
   attributesForFaceting: [
     "cuisine_category",
     "food_type",
@@ -85,8 +91,8 @@ const INDEX_SETTINGS = {
     "area",
     "price_range",
     "price_display",
-    "dining_style",
     "payment_options",
+    "dining_style",
   ],
   customRanking: ["desc(popularity_score)", "desc(reviews_count)"],
   // `ranking` deliberately left at Algolia's default (typo, geo, words,
