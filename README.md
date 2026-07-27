@@ -10,29 +10,9 @@ front-end that searches it.
 - **Support access:** enabled on the Algolia dashboard (Settings → Support
   Access) per the assignment's deliverables checklist.
 
-## Where to start reading
-
-This repo has more written reasoning than most take-homes - read it in
-this order:
-
-1. **[`APPROACH.md`](APPROACH.md)** - the short version. One page covering
-   data, index/relevance, front-end, and judgment calls. Start here.
-2. **[`DECISIONS.md`](DECISIONS.md)** - the full log. Every data,
-   relevance, scope, and tooling decision, each with _what_, _why_, and
-   _what the alternative was_. This is the source of truth if anything in
-   the code looks like a choice rather than an obvious default - it
-   almost certainly is one, and it's explained here.
-3. **[`DESIGN_PROMPT.md`](DESIGN_PROMPT.md)** - the UX/visual brief used to
-   generate the front-end's design direction in Claude Design.
-4. **[`CLAUDE.md`](CLAUDE.md)** - architecture reference (written for an
-   AI coding agent working in this repo, but doubles as a technical map of
-   how the front-end is put together: component responsibilities, what
-   bypasses `react-instantsearch` and why, facet hierarchy, etc.).
-
-The original assignment brief, prospect discovery notes, and scoring
-rubric are under `assignment/`.
-
 ## Setup
+
+To run locally and/or execute scripts
 
 ```bash
 npm install
