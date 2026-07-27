@@ -79,7 +79,7 @@ one and discarding the other would be an unexplainable data loss if a
 grader cross-checked the raw files. This is exactly the kind of
 discrepancy I'd flag to a real customer rather than resolve unilaterally.
 
-**Reversed 2026-07-22:** The Price facet (`FacetSidebar.tsx`) now filters
+**Reversed:** The Price facet (`FacetSidebar.tsx`) now filters
 on `price_display` instead of `price_range`, faceted directly rather than
 via a hand-rolled `price_range` -> \$ signage lookup table. The lookup
 table had assigned its own signage per `price_range` bucket, duplicating
@@ -247,7 +247,7 @@ principled reason a neighborhood match should outrank a city match or
 vice versa, so they're deliberately siblings within one tier, below
 `food_type` and above `address`.
 
-**Gap found and fixed 2026-07-23: state wasn't searchable at all.**
+**Gap : state wasn't searchable at all.**
 Queries combining a US state with a cuisine, e.g. "tx japanese" or "texas
 sushi", a plausible real query pattern, returned zero results. Checked
 against real data first rather than assumed: `area` (the next coarsest
@@ -265,7 +265,7 @@ present, not something to derive or fabricate, matching the same
 Covered by two new assertions in `test-search-quality.js` ("tx japanese",
 "texas sushi", both checked against real TX Sushi/Japanese records).
 
-**Gap found and fixed 2026-07-23: `cuisine_category` and `dining_style`
+**Gap found and fixed: `cuisine_category` and `dining_style`
 were facetable but not searchable, a real recall gap, not a cosmetic
 one.** `cuisine_category` is an invented grouping (see "Cuisine grouping:
 `cuisine_category`" below), so a category-level free-text query like
@@ -312,7 +312,7 @@ assertions already used), consistent with the project's own principle of
 checking real data before asserting: the failure looked like a broken fix
 at first glance, checking it properly showed it was a broken test.
 
-**Cleanup 2026-07-23: dropped unused `searchable()` wrappers in
+**Cleanup : dropped unused `searchable()` wrappers in
 `attributesForFaceting`.** `food_type`, `city`, and `neighborhood` were
 declared `searchable(food_type)` etc, which enables Algolia's
 `searchForFacetValues` (a typeahead search *within* a facet's list of
@@ -334,7 +334,7 @@ dropdown outgrows a plain `<select>`).
 
 ## [Relevance] Custom ranking: Bayesian-adjusted rating
 
-**Decision:** approved. `customRanking` uses a Bayesian-weighted score
+**Decision:**  `customRanking` uses a Bayesian-weighted score
 (`(v/(v+m))×R + (m/(v+m))×C`, R = restaurant's own rating, v = its review
 count, C = 4.294 dataset-wide average, m = 336 median review count as the
 "how much evidence do we need" threshold) rather than raw `stars_count`.
@@ -1256,23 +1256,6 @@ default2-original.png`), not a real photo, not distinct per restaurant.
 This dataset is roughly 10 years old (scraped via the `sosedoff/opentable`
 project, credited in the assignment's own README), and the legacy CDN
 path it points to appears fully deprecated.
-
-**First pass got this wrong, twice, worth being honest about both:**
-
-1. Initially dropped the field entirely during data prep
-   (`prepare-data.js`), conflating cleaning/transforming source data with
-   choosing what to expose in the product, the same mistake flagged
-   earlier in this project, resurfacing in a new spot.
-2. Corrected that to keep the field in the local data but explicitly
-   exclude it from what's pushed to Algolia (mirroring how
-   `payment_options_raw` is handled). Reasonable-sounding, but wrong for
-   a different reason: it's not equivalent to `payment_options_raw`
-   (genuinely internal/debug-only data with no product use). `image_url`
-   is real customer-provided data that happens to be stale, and the
-   decision already made for the price/price_range discrepancy was to
-   represent imperfect real data as-is and flag it, not suppress it.
-   Applying that logic inconsistently to `image_url` was the actual
-   error.
 
 **Final decision: use `image_url` as-is, everywhere**, pushed to
 Algolia and rendered in the UI exactly like every other field. It
