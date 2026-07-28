@@ -12,7 +12,7 @@ front-end that searches it.
 
 ## Approach
 
-A high-level description of the approach taken and decisions made can be found in [`DECISIONS.md`](DECISIONS.md)
+A high-level description of the approach taken can be found in [`APPROACH.md`](APPROACH.md)
 
 ## Setup
 
@@ -44,7 +44,7 @@ Next.js build, not re-run on every request.
 | `prepare-data.js`         | `npm run prepare-data`         | Joins `data/source/restaurants_list.json` (5,000 records) with `restaurants_info.csv` on `objectID`, normalizes payment options to the four allowed card brands, derives `cuisine_category`, and writes `data/restaurants.json`. Also chains `build-area-centroids.js` at the end.                                                                                                                                                                                                     |
 | `build-area-centroids.js` | `npm run build-area-centroids` | Reads `data/restaurants.json`, averages `_geoloc` per `area`, writes `data/area-centroids.json`. Lets browser geolocation resolve to the nearest `area` facet value. Runs automatically as part of `prepare-data`; also exposed standalone for re-running in isolation.                                                                                                                                                                                                                |
 | `push-to-algolia.js`      | `npm run push-to-algolia`      | Reads `data/restaurants.json`, computes a Bayesian-adjusted `popularity_score` per record, drops the local-only `payment_options_raw` field, pushes all records to the index, then applies `searchableAttributes`, `attributesForFaceting`, `customRanking`, and cuisine synonyms. **Uses the admin key - writes to the live index.** Every setting it applies is already decided and reasoned about in `DECISIONS.md`; this script encodes those decisions, it doesn't make new ones. |
-| `test-search-quality.js`  | `npm run test-search-quality`  | 18 assertions against the **live** index (search-only key, read-only): typo tolerance, chain disambiguation, concatenated-word queries, synonyms, empty/no-results handling. Currently 18/18. Re-run after any change to `push-to-algolia.js` or index settings.                                                                                                                                                                                                                       |
+| `test-search-quality.js`  | `npm run test-search-quality`  | 26 assertions against the **live** index (search-only key, read-only): typo tolerance, chain disambiguation, concatenated-word queries, synonyms, empty/no-results handling. Currently 26/26. Re-run after any change to `push-to-algolia.js` or index settings.                                                                                                                                                                                                                       |
 
 Typical order for a full rebuild from scratch:
 

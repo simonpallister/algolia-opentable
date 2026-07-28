@@ -14,7 +14,7 @@ An additional field, `cuisine_category` (surfaced as "Cuisine" in the UI) was cr
 
 ## Index and relevance
 
-Searchable attributes are prioritised: `name` > `food_type`/`cuisine_category` > `city`/`area`/`neighborhood`/`state`/`state_name` > `dining_style` > `address`, so a strong name match always wins but a half-remembered street name still resolves once name search comes up empty. Custom ranking uses a Bayesian-adjusted rating (`popularity_score`) rather than raw star count, correcting for the vanity-metric problem of a handful of 5-star restaurants with only 2-3 reviews outranking places with thousands. Typo tolerance was tested, not assumed: an 18-assertion suite against the live index (`npm run test-search-quality`) covers concatenated words, chain disambiguation via geo-ranking, and broad/misspelled/ambiguous/empty queries.
+Searchable attributes are prioritised: `name` > `food_type`/`cuisine_category` > `city`/`area`/`neighborhood`/`state`/`state_name` > `dining_style` > `address`, so a strong name match always wins but a half-remembered street name still resolves once name search comes up empty. Custom ranking uses a Bayesian-adjusted rating (`popularity_score`) rather than raw star count, correcting for the vanity-metric problem of a handful of 5-star restaurants with only 2-3 reviews outranking places with thousands. Typo tolerance was tested, not assumed: a 26-assertion suite against the live index (`npm run test-search-quality`) covers concatenated words, chain disambiguation via geo-ranking, and broad/misspelled/ambiguous/empty queries.
 
 `food_type`'s 114 raw values was grouped into 13 browse-friendly `cuisine_category` buckets for the primary Cuisine facet, with `food_type` itself surfacing as a second-level filter.
 
