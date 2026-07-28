@@ -10,6 +10,10 @@ front-end that searches it.
 - **Support access:** enabled on the Algolia dashboard (Settings → Support
   Access) per the assignment's deliverables checklist.
 
+## Approach
+
+A high-level description of the approach taken and decisions made can be found in [`DECISIONS.md`](DECISIONS.md)
+
 ## Setup
 
 To run locally and/or execute scripts

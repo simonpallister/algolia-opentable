@@ -226,6 +226,18 @@ async function main() {
       return hits.length > 0 && contemporaryCount / hits.length >= 0.5;
     }
   );
+  await check('"steakhouse" also returns restaurants tagged plainly "Steak" (one-way, edit distance exceeds default typo tolerance)', async () => {
+    const { hits } = await index.search("steakhouse", { hitsPerPage: 30 });
+    return hits.some((h) => h.food_type === "Steak");
+  });
+  await check('"steak" stays broad and still reaches Steakhouse too (already true via prefix matching, unaffected by the one-way synonym)', async () => {
+    const { hits } = await index.search("steak", { hitsPerPage: 30 });
+    return hits.some((h) => h.food_type === "Steakhouse");
+  });
+  await check('"hawaiian" also returns Hawaii Regional Cuisine restaurants (edit distance exceeds default typo tolerance)', async () => {
+    const { hits } = await index.search("hawaiian", { hitsPerPage: 30 });
+    return hits.some((h) => h.food_type === "Hawaii Regional Cuisine");
+  });
 
   // --- Summary -------------------------------------------------------------
   console.log(`\n${passed} passed, ${failed} failed (out of ${passed + failed} assertions)`);

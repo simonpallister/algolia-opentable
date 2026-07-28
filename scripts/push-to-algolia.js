@@ -121,6 +121,31 @@ const SYNONYMS = [
     input: "american",
     synonyms: ["contemporary american"],
   },
+  {
+    // "steak" -> "steakhouse" is already reachable via Algolia's own
+    // prefix matching (single-word query, default prefixLast). The
+    // reverse isn't: "steakhouse" is 5 characters longer than "steak",
+    // well outside default typo tolerance, so a "steakhouse" query alone
+    // never reached the 123 records tagged plainly "Steak" - a real,
+    // directional gap, not a cosmetic one.
+    objectID: "synonym-steakhouse-steak",
+    type: "oneWaySynonym",
+    input: "steakhouse",
+    synonyms: ["steak"],
+  },
+  {
+    // Same shape of gap: "hawaii" is a prefix of "Hawaiian" (already
+    // reachable), but "hawaiian" is NOT a prefix of "Hawaii Regional
+    // Cuisine" and the edit distance exceeds default typo tolerance for a
+    // 6-letter word. Same practical-intent judgment call as creole/cajun
+    // above: technically "Hawaii Regional Cuisine" names a specific 1990s
+    // fusion movement rather than home-style Hawaiian food, but a searcher
+    // typing "hawaiian" wants both, and the raw data doesn't distinguish
+    // them consistently either.
+    objectID: "synonym-hawaiian-hawaii-regional",
+    type: "synonym",
+    synonyms: ["hawaiian", "hawaii regional cuisine"],
+  },
 ]
 
 async function main() {
